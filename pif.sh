@@ -85,8 +85,14 @@ find . -maxdepth 1 -name "*_METADATA" -exec rm {} \;
 cp pif.json chiteroman.json
 
 # Migrate data using the migrate_osmosis.sh script and output to osmosis.json
-./migrate_osmosis.sh -a pif.json device_osmosis.json 
-./migrate_osmosis.sh -a pif.json osmosis.json 
+./migrate_osmosis.sh -a pif.json device_osmosis.json
+sed -i 's|//.*||g; /^[[:space:]]*$/d' device_osmosis.json
+jq '(.spoofBuild, .spoofVendingFinger, .spoofProps) = "1" | (.spoofProvider, .spoofSignature, .spoofVendingSdk) = "0"' device_osmosis.json > tmp.json && mv tmp.json device_osmosis.json
+
+
+./migrate_osmosis.sh -a pif.json osmosis.json
+sed -i 's|//.*||g; /^[[:space:]]*$/d' osmosis.json
+jq '(.spoofBuild, .spoofProvider, .spoofVendingFinger, .spoofProps) = "1" | (.spoofSignature, .spoofVendingSdk) = "0"' osmosis.json > tmp.json && mv tmp.json osmosis.json
 
 # Delete the previously created pif.json as it's no longer needed
 rm pif.json
